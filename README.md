@@ -14,18 +14,22 @@
 
 ## 🕹️ Boshqaruv Tugmalari
 
+### 🎮 Yangi 360° Analog Jostik (Controller):
+* Ekranning chap pastki qismidagi interaktiv analog **Jostik** orqali qahramonni erkin 360 darajada harakatlantiring (Sensorli ekran yoki Sichqoncha orqali).
+* Ekranning yuqori o'ng qismidagi `🎮` tugmasi orqali jostikni xohlagan paytda ko'rsatish yoki yashirish mumkin.
+
 ### 💻 Kompyuterda (Desktop):
-* **Harakatlanish:** `W`, `A`, `S`, `D` yoki `Yo'nalish strelkalari (▲ ◀ ▼ ▶)`
-* **Phantom Dash (Tezkor oldinga otilish):** `Space` (Bo'sh joy)
-* **Sehrli olovli to'p:** `F`
-* **Muz Blizzard sehri:** `Q`
+* **Harakatlanish:** Jostik yoki `W`, `A`, `S`, `D` / `Strelkalar (▲ ◀ ▼ ▶)`
+* **Phantom Dash (Tezkor oldinga otilish):** `Space` (Bo'sh joy) yoki ekrandagi `💨 DASH` tugmasi
+* **Sehrli olovli to'p:** `F` yoki ekrandagi `⚡ SEHR` tugmasi
+* **Muz Blizzard sehri:** `Q` yoki ekrandagi `❄️ MUZ` tugmasi
 * **Pauza:** `P` yoki `Esc`
 * **To'liq ekran:** `F11` yoki ekrandagi `⛶` tugmasi
 
 ### 📱 Smartfon va Planshetlarda (Mobile):
-* Chap qo'l: Sensorli Virtual D-Pad (Yo'nalishlar)
-* O'ng qo'l: Harakat tugmalari (Dash, Muz Blizzard, Sehr)
-* Yuqori burchak: Gamburger menyu (Pauza, Ovoz, To'liq ekran)
+* Chap qo'l: Sensorli 360° Virtual Analog Jostik
+* O'ng qo'l: Ergonomik harakat tugmalari (`💨 DASH`, `❄️ MUZ`, `⚡ SEHR`)
+* Yuqori o'ng burchak: Gamburger menyu (Pauza, Jostik, Ovoz, To'liq ekran)
 
 ---
 

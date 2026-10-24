@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Xazina Ovchisi - 2D Sarguzasht O'yini</title>
-    <link rel="stylesheet" href="style.css?v=20261022_04">
+    <link rel="stylesheet" href="style.css?v=20261024_joystick">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -51,6 +51,7 @@
                 <div class="hud-item" id="hud-key-item">
                     <span id="hud-key" title="Kalit">🗝️</span>
                 </div>
+                <button id="btn-joystick" class="hud-btn" aria-label="Jostik" title="Jostikni yoqish yoki yashirish (🎮)">🎮</button>
                 <!-- Desktop Buttons -->
                 <button id="btn-fullscreen" class="hud-btn desktop-only" aria-label="To'liq ekran" title="To'liq ekran (⛶)">⛶</button>
                 <button id="btn-mute" class="hud-btn desktop-only" aria-label="Ovozni yoqish yoki o'chirish" title="Ovoz">🔊</button>
@@ -65,15 +66,22 @@
             <canvas id="gameCanvas" width="800" height="600"></canvas>
         </main>
 
-        <!-- Mobile Touch Virtual Controls (Optimized Ergonomic Layout) -->
-        <nav id="touch-controls" aria-label="Sensorli boshqaruv">
-            <!-- Left Hand: Virtual D-Pad -->
-            <div class="dpad-container" id="dpad-container">
-                <div class="dpad-hub"></div>
-                <button id="touch-up" class="dpad-btn btn-dir-up" aria-label="Yuqoriga">▲</button>
-                <button id="touch-left" class="dpad-btn btn-dir-left" aria-label="Chapga">◀</button>
-                <button id="touch-right" class="dpad-btn btn-dir-right" aria-label="O'ngga">▶</button>
-                <button id="touch-down" class="dpad-btn btn-dir-down" aria-label="Pastga">▼</button>
+        <!-- Virtual Controls / Analog Joystick & Action Buttons -->
+        <nav id="touch-controls" aria-label="Virtual kontroller boshqaruvi">
+            <!-- Left Hand: 360° Analog Joystick Controller -->
+            <div class="joystick-zone" id="joystick-zone" aria-label="Analog Jostik">
+                <div class="joystick-base" id="joystick-base">
+                    <div class="joystick-ring"></div>
+                    <div class="joystick-crosshair">
+                        <span class="joystick-pip pip-n">▲</span>
+                        <span class="joystick-pip pip-e">▶</span>
+                        <span class="joystick-pip pip-s">▼</span>
+                        <span class="joystick-pip pip-w">◀</span>
+                    </div>
+                    <div class="joystick-stick" id="joystick-stick">
+                        <div class="joystick-knob-core"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Right Hand: Ergonomic Thumb Action Cluster Arc -->
@@ -126,6 +134,10 @@
                     <button id="burger-btn-mute" class="burger-menu-item">
                         <span class="burger-item-icon" id="burger-mute-icon">🔊</span>
                         <span class="burger-item-text" id="burger-mute-text">Ovoz: Yoqilgan</span>
+                    </button>
+                    <button id="burger-btn-joystick" class="burger-menu-item">
+                        <span class="burger-item-icon">🎮</span>
+                        <span class="burger-item-text" id="burger-joystick-text">Jostik: Ko'rsatilgan</span>
                     </button>
                     <button id="burger-btn-fullscreen" class="burger-menu-item">
                         <span class="burger-item-icon">⛶</span>
@@ -283,11 +295,12 @@
 
                     <div class="guide-section-title">Boshqaruv</div>
                     <div class="guide-controls">
-                        ⌨️ <strong>Harakat:</strong> WASD yoki Strelkalar<br>
-                        ⚡ <strong>Sehr Otish:</strong> SPACE (Bo'shliq tugmasi)<br>
-                        💨 <strong>Phantom Dash:</strong> SHIFT tugmasi<br>
+                        🎮 <strong>Jostik (Controller):</strong> Ekranning chap pastki qismidagi analog jostik orqali boshqarish<br>
+                        ⌨️ <strong>Klaviatura:</strong> WASD yoki Strelkalar orqali harakatlanish<br>
+                        ⚡ <strong>Sehr:</strong> F yoki ekrandagi ⚡ SEHR tugmasi<br>
+                        ❄️ <strong>Muz Blizzard:</strong> Q yoki ekrandagi ❄️ MUZ tugmasi<br>
+                        💨 <strong>Phantom Dash:</strong> SPACE (Bo'shliq) yoki 💨 DASH tugmasi<br>
                         ⏸️ <strong>Pauza:</strong> P yoki Esc tugmasi<br>
-                        📱 <strong>Telefon:</strong> Sensorli D-Pad + ⚡ SEHR va 💨 DASH tugmalari<br>
                         ❤️ <strong>Jonlar:</strong> Jami 3 ta jon. Vaqt chegarasi yo'q!
                     </div>
                 </div>
@@ -414,6 +427,6 @@
     </div>
 
     <!-- Main Game Script: Standalone bundle with zero external dependencies. Works directly on file://, http://, and offline. -->
-    <script src="js/game-bundle.js?v=20261022_04"></script>
+    <script src="js/game-bundle.js?v=20261024_joystick"></script>
 </body>
 </html>

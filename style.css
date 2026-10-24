@@ -841,7 +841,7 @@ html, body {
     border-color: var(--color-danger);
 }
 
-/* --- Mobile Touch Controls --- */
+/* --- Virtual Controls Container --- */
 #touch-controls {
     position: absolute;
     bottom: 0;
@@ -851,17 +851,22 @@ html, body {
     padding-bottom: max(14px, env(safe-area-inset-bottom));
     padding-left: max(16px, env(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
-    display: none; /* Shown on touch screens */
+    display: flex;
     justify-content: space-between;
     align-items: flex-end;
     pointer-events: none;
     z-index: 25;
     touch-action: none;
     box-sizing: border-box;
+    transition: opacity 0.2s ease;
 }
 
-/* --- Left Thumb: Virtual D-Pad --- */
-.dpad-container {
+#touch-controls.touch-controls-hidden {
+    display: none !important;
+}
+
+/* --- Left Thumb: 360° Analog Joystick Controller --- */
+.joystick-zone {
     position: relative;
     width: 140px;
     height: 140px;
@@ -869,76 +874,99 @@ html, body {
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
-}
-
-.dpad-hub {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 44px;
-    height: 44px;
-    background: rgba(14, 31, 56, 0.85);
-    border: 2px solid rgba(255, 201, 60, 0.4);
-    border-radius: 50%;
-    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6);
-    pointer-events: none;
-}
-
-.dpad-btn {
-    position: absolute;
-    background: linear-gradient(135deg, rgba(29, 53, 87, 0.9) 0%, rgba(14, 31, 56, 0.95) 100%);
-    border: 2px solid var(--color-gold);
-    color: var(--color-gold);
-    font-size: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.joystick-base {
+    position: relative;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, rgba(29, 53, 87, 0.75) 0%, rgba(14, 31, 56, 0.94) 85%);
+    border: 3px solid var(--color-gold);
+    box-shadow: 0 0 16px rgba(255, 201, 60, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+    pointer-events: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.joystick-base.active {
+    cursor: grabbing;
+    border-color: #FFE066;
+    box-shadow: 0 0 26px rgba(255, 224, 102, 0.75), inset 0 0 24px rgba(0, 0, 0, 0.85);
+}
+
+.joystick-ring {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(255, 201, 60, 0.35);
+    pointer-events: none;
+}
+
+.joystick-crosshair {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.joystick-pip {
+    position: absolute;
+    font-size: 11px;
+    color: rgba(255, 201, 60, 0.5);
     user-select: none;
-    -webkit-user-select: none;
-    touch-action: none;
-    transition: transform 0.08s ease, background 0.08s ease;
+    font-weight: 900;
+    transition: color 0.1s ease, transform 0.1s ease, text-shadow 0.1s ease;
 }
 
-.dpad-btn:active, .dpad-btn.active {
-    background: var(--color-gold);
-    color: #1D3557;
-    transform: scale(0.92);
-    box-shadow: 0 0 12px var(--color-gold);
+.joystick-pip.active {
+    color: #FFE066;
+    text-shadow: 0 0 8px #FFE066;
+    transform-origin: center;
 }
 
-.btn-dir-up {
-    top: 0;
-    left: 46px;
-    width: 48px;
-    height: 44px;
-    border-radius: 12px 12px 4px 4px;
+.pip-n { top: 6px; left: 50%; transform: translateX(-50%); }
+.pip-n.active { transform: translateX(-50%) scale(1.3); }
+
+.pip-s { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.pip-s.active { transform: translateX(-50%) scale(1.3); }
+
+.pip-w { left: 8px; top: 50%; transform: translateY(-50%); }
+.pip-w.active { transform: translateY(-50%) scale(1.3); }
+
+.pip-e { right: 8px; top: 50%; transform: translateY(-50%); }
+.pip-e.active { transform: translateY(-50%) scale(1.3); }
+
+.joystick-stick {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #F4A261 0%, #E76F51 55%, #9A3412 100%);
+    border: 2.5px solid var(--color-gold);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.55), inset 0 2px 4px rgba(255, 255, 255, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    transform: translate(0px, 0px);
+    will-change: transform;
 }
 
-.btn-dir-down {
-    bottom: 0;
-    left: 46px;
-    width: 48px;
-    height: 44px;
-    border-radius: 4px 4px 12px 12px;
-}
-
-.btn-dir-left {
-    top: 46px;
-    left: 0;
-    width: 44px;
-    height: 48px;
-    border-radius: 12px 4px 4px 12px;
-}
-
-.btn-dir-right {
-    top: 46px;
-    right: 0;
-    width: 44px;
-    height: 48px;
-    border-radius: 4px 12px 12px 4px;
+.joystick-knob-core {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 201, 60, 0.5) 60%, transparent 100%);
+    border: 1.5px solid rgba(255, 201, 60, 0.7);
+    box-shadow: 0 0 8px var(--color-gold);
 }
 
 /* --- Right Thumb: Ergonomic Action Button Cluster --- */
@@ -1190,26 +1218,19 @@ html, body {
         display: none;
     }
 
-    .dpad-container {
+    .joystick-zone {
         width: 126px;
         height: 126px;
     }
 
-    .dpad-hub {
-        width: 38px;
-        height: 38px;
+    .joystick-base {
+        width: 118px;
+        height: 118px;
     }
 
-    .btn-dir-up, .btn-dir-down {
-        left: 41px;
-        width: 44px;
-        height: 40px;
-    }
-
-    .btn-dir-left, .btn-dir-right {
-        top: 41px;
-        width: 40px;
-        height: 44px;
+    .joystick-stick {
+        width: 50px;
+        height: 50px;
     }
 
     .action-cluster {
@@ -1253,26 +1274,19 @@ html, body {
         padding: 6px 14px;
     }
 
-    .dpad-container {
+    .joystick-zone {
         width: 110px;
         height: 110px;
     }
 
-    .btn-dir-up, .btn-dir-down {
-        left: 36px;
-        width: 38px;
-        height: 34px;
+    .joystick-base {
+        width: 102px;
+        height: 102px;
     }
 
-    .btn-dir-left, .btn-dir-right {
-        top: 36px;
-        width: 34px;
-        height: 38px;
-    }
-
-    .dpad-hub {
-        width: 32px;
-        height: 32px;
+    .joystick-stick {
+        width: 44px;
+        height: 44px;
     }
 
     .action-cluster {

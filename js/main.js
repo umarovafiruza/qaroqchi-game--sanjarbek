@@ -67,7 +67,10 @@ class Game {
             up: false,
             down: false,
             left: false,
-            right: false
+            right: false,
+            joystickActive: false,
+            joystickX: 0,
+            joystickY: 0
         };
 
         // Timing
@@ -152,88 +155,9 @@ class Game {
             if (e.code === 'ArrowRight' || e.code === 'KeyD') this.input.right = false;
         });
 
-        // Mobile Ergonomic Touch D-Pad with sliding joystick feel
-        const dpad = this.ui.dom.dpadContainer;
-        if (dpad) {
-            const updateDpadTouch = (e) => {
-                e.preventDefault();
-                sound.init();
-
-                const touch = e.targetTouches && e.targetTouches[0] ? e.targetTouches[0] : e;
-                if (!touch) return;
-
-                const rect = dpad.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                const dx = touch.clientX - centerX;
-                const dy = touch.clientY - centerY;
-                const dist = Math.hypot(dx, dy);
-
-                // Deadzone check (center neutral zone ~12px)
-                if (dist < 12) {
-                    this.input.up = false;
-                    this.input.down = false;
-                    this.input.left = false;
-                    this.input.right = false;
-                    this.clearDpadActiveClasses();
-                    return;
-                }
-
-                // Determine active directions based on angle
-                const angle = Math.atan2(dy, dx);
-                const isRight = (angle >= -Math.PI * 0.35 && angle <= Math.PI * 0.35);
-                const isLeft = (angle >= Math.PI * 0.65 || angle <= -Math.PI * 0.65);
-                const isDown = (angle >= Math.PI * 0.15 && angle <= Math.PI * 0.85);
-                const isUp = (angle <= -Math.PI * 0.15 && angle >= -Math.PI * 0.85);
-
-                this.input.right = isRight;
-                this.input.left = isLeft;
-                this.input.down = isDown;
-                this.input.up = isUp;
-
-                this.setDpadActiveClass(this.ui.dom.btnTouchUp, isUp);
-                this.setDpadActiveClass(this.ui.dom.btnTouchDown, isDown);
-                this.setDpadActiveClass(this.ui.dom.btnTouchLeft, isLeft);
-                this.setDpadActiveClass(this.ui.dom.btnTouchRight, isRight);
-            };
-
-            const endDpadTouch = (e) => {
-                e.preventDefault();
-                this.input.up = false;
-                this.input.down = false;
-                this.input.left = false;
-                this.input.right = false;
-                this.clearDpadActiveClasses();
-            };
-
-            dpad.addEventListener('touchstart', updateDpadTouch, { passive: false });
-            dpad.addEventListener('touchmove', updateDpadTouch, { passive: false });
-            dpad.addEventListener('touchend', endDpadTouch, { passive: false });
-            dpad.addEventListener('touchcancel', endDpadTouch, { passive: false });
-        }
-
-        // Mouse button fallback for desktop testing
-        const bindButtonFallback = (elem, dir) => {
-            if (!elem) return;
-            const start = (e) => {
-                e.preventDefault();
-                sound.init();
-                this.input[dir] = true;
-                elem.classList.add('active');
-            };
-            const end = (e) => {
-                e.preventDefault();
-                this.input[dir] = false;
-                elem.classList.remove('active');
-            };
-            elem.addEventListener('mousedown', start);
-            elem.addEventListener('mouseup', end);
-            elem.addEventListener('mouseleave', end);
-        };
-        bindButtonFallback(this.ui.dom.btnTouchUp, 'up');
-        bindButtonFallback(this.ui.dom.btnTouchDown, 'down');
-        bindButtonFallback(this.ui.dom.btnTouchLeft, 'left');
-        bindButtonFallback(this.ui.dom.btnTouchRight, 'right');
+        // 360° Analog Virtual Joystick Controller & Action Controls
+        this.setupJoystick();
+        this.setupJoystickToggle();
 
         // Mobile Fantastic Touch Buttons (Magic, Freeze, Dash)
         if (this.ui.dom.btnTouchMagic) {
@@ -442,17 +366,164 @@ class Game {
         }
     }
 
-    setDpadActiveClass(btn, active) {
-        if (!btn) return;
-        if (active) btn.classList.add('active');
-        else btn.classList.remove('active');
+    setupJoystick() {
+        const zone = this.ui.dom.joystickZone;
+        const base = this.ui.dom.joystickBase;
+        const stick = this.ui.dom.joystickStick;
+        if (!zone || !base || !stick) return;
+
+        let activePointerId = null;
+        let baseRect = null;
+
+        const updatePips = (normX, normY, active) => {
+            const { pipN, pipS, pipE, pipW } = this.ui.dom;
+            if (pipN) pipN.classList.toggle('active', active && normY < -0.3);
+            if (pipS) pipS.classList.toggle('active', active && normY > 0.3);
+            if (pipE) pipE.classList.toggle('active', active && normX > 0.3);
+            if (pipW) pipW.classList.toggle('active', active && normX < -0.3);
+        };
+
+        const onPointerMove = (e) => {
+            if (e.pointerId !== activePointerId) return;
+            if (!baseRect) baseRect = base.getBoundingClientRect();
+
+            const centerX = baseRect.left + baseRect.width / 2;
+            const centerY = baseRect.top + baseRect.height / 2;
+            const dx = e.clientX - centerX;
+            const dy = e.clientY - centerY;
+            const dist = Math.hypot(dx, dy);
+
+            const stickW = stick.offsetWidth || 56;
+            const maxRadius = Math.max(20, (baseRect.width / 2) - (stickW / 2));
+            const angle = Math.atan2(dy, dx);
+            const clampedDist = Math.min(dist, maxRadius);
+
+            const stickX = Math.cos(angle) * clampedDist;
+            const stickY = Math.sin(angle) * clampedDist;
+            stick.style.transform = `translate(${stickX.toFixed(1)}px, ${stickY.toFixed(1)}px)`;
+
+            // Deadzone check (5px)
+            if (dist < 5) {
+                this.input.joystickActive = false;
+                this.input.joystickX = 0;
+                this.input.joystickY = 0;
+                this.input.up = false;
+                this.input.down = false;
+                this.input.left = false;
+                this.input.right = false;
+                updatePips(0, 0, false);
+                return;
+            }
+
+            const intensity = clampedDist / maxRadius;
+            const normX = (stickX / maxRadius) * intensity;
+            const normY = (stickY / maxRadius) * intensity;
+
+            this.input.joystickActive = true;
+            this.input.joystickX = Math.max(-1, Math.min(1, normX));
+            this.input.joystickY = Math.max(-1, Math.min(1, normY));
+
+            // Directional flags for discrete listeners
+            const isRight = (angle >= -Math.PI * 0.35 && angle <= Math.PI * 0.35);
+            const isLeft = (angle >= Math.PI * 0.65 || angle <= -Math.PI * 0.65);
+            const isDown = (angle >= Math.PI * 0.15 && angle <= Math.PI * 0.85);
+            const isUp = (angle <= -Math.PI * 0.15 && angle >= -Math.PI * 0.85);
+
+            this.input.right = isRight;
+            this.input.left = isLeft;
+            this.input.down = isDown;
+            this.input.up = isUp;
+
+            updatePips(normX, normY, true);
+        };
+
+        const onPointerDown = (e) => {
+            if (activePointerId !== null) return;
+            activePointerId = e.pointerId;
+            sound.init();
+
+            try {
+                zone.setPointerCapture(e.pointerId);
+            } catch (_) {}
+
+            base.classList.add('active');
+            stick.style.transition = 'none';
+            baseRect = base.getBoundingClientRect();
+            onPointerMove(e);
+        };
+
+        const onPointerEnd = (e) => {
+            if (e.pointerId !== activePointerId) return;
+            try {
+                zone.releasePointerCapture(e.pointerId);
+            } catch (_) {}
+
+            activePointerId = null;
+            baseRect = null;
+            base.classList.remove('active');
+
+            // Smooth spring return animation
+            stick.style.transition = 'transform 0.16s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            stick.style.transform = 'translate(0px, 0px)';
+
+            this.input.joystickActive = false;
+            this.input.joystickX = 0;
+            this.input.joystickY = 0;
+            this.input.up = false;
+            this.input.down = false;
+            this.input.left = false;
+            this.input.right = false;
+            updatePips(0, 0, false);
+        };
+
+        zone.addEventListener('pointerdown', onPointerDown, { passive: false });
+        zone.addEventListener('pointermove', onPointerMove, { passive: false });
+        zone.addEventListener('pointerup', onPointerEnd, { passive: false });
+        zone.addEventListener('pointercancel', onPointerEnd, { passive: false });
     }
 
-    clearDpadActiveClasses() {
-        this.setDpadActiveClass(this.ui.dom.btnTouchUp, false);
-        this.setDpadActiveClass(this.ui.dom.btnTouchDown, false);
-        this.setDpadActiveClass(this.ui.dom.btnTouchLeft, false);
-        this.setDpadActiveClass(this.ui.dom.btnTouchRight, false);
+    setupJoystickToggle() {
+        const toggleBtn = this.ui.dom.btnJoystickToggle;
+        const burgerBtn = this.ui.dom.burgerBtnJoystick;
+        const controls = this.ui.dom.touchControls;
+        if (!controls) return;
+
+        const updateVisibility = (visible) => {
+            if (visible) {
+                controls.classList.remove('touch-controls-hidden');
+            } else {
+                controls.classList.add('touch-controls-hidden');
+            }
+            if (toggleBtn) {
+                toggleBtn.classList.toggle('active', visible);
+                toggleBtn.title = visible ? "Jostikni yashirish (🎮)" : "Jostikni ko'rsatish (🎮)";
+            }
+            if (this.ui.dom.burgerJoystickText) {
+                this.ui.dom.burgerJoystickText.textContent = visible ? "Jostik: Ko'rsatilgan" : "Jostik: Yashirilgan";
+            }
+            try {
+                localStorage.setItem('game_show_joystick', visible ? 'true' : 'false');
+            } catch (_) {}
+        };
+
+        const toggle = (e) => {
+            if (e) e.preventDefault();
+            sound.init();
+            sound.playClick();
+            const isHidden = controls.classList.contains('touch-controls-hidden');
+            updateVisibility(isHidden);
+        };
+
+        if (toggleBtn) toggleBtn.addEventListener('click', toggle);
+        if (burgerBtn) burgerBtn.addEventListener('click', toggle);
+
+        // Check stored preference (default is true - shown!)
+        let shouldShow = true;
+        try {
+            const stored = localStorage.getItem('game_show_joystick');
+            if (stored === 'false') shouldShow = false;
+        } catch (_) {}
+        updateVisibility(shouldShow);
     }
 
     /**
@@ -549,6 +620,9 @@ class Game {
         this.input.down = false;
         this.input.left = false;
         this.input.right = false;
+        this.input.joystickActive = false;
+        this.input.joystickX = 0;
+        this.input.joystickY = 0;
 
         this.updateZoomAndCamera(true);
         this.updateHUD();

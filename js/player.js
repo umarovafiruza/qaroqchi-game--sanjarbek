@@ -164,24 +164,27 @@ export class Player {
         let dirX = 0;
         let dirY = 0;
 
-        if (input.left) dirX -= 1;
-        if (input.right) dirX += 1;
-        if (input.up) dirY -= 1;
-        if (input.down) dirY += 1;
+        // Check analog joystick input first
+        if (input.joystickActive && (Math.abs(input.joystickX) > 0.04 || Math.abs(input.joystickY) > 0.04)) {
+            dirX = input.joystickX;
+            dirY = input.joystickY;
+            const mag = Math.hypot(dirX, dirY);
+            if (mag > 1) {
+                dirX /= mag;
+                dirY /= mag;
+            }
+        } else {
+            if (input.left) dirX -= 1;
+            if (input.right) dirX += 1;
+            if (input.up) dirY -= 1;
+            if (input.down) dirY += 1;
 
-        // If dashing without directional key held, dash in current facing direction
-        if (this.isDashing && dirX === 0 && dirY === 0) {
-            if (this.facing === 'left') dirX = -1;
-            else if (this.facing === 'right') dirX = 1;
-            else if (this.facing === 'up') dirY = -1;
-            else dirY = 1;
-        }
-
-        // Normalize diagonal movement speed
-        if (dirX !== 0 && dirY !== 0) {
-            const invSqrt2 = 0.70710678;
-            dirX *= invSqrt2;
-            dirY *= invSqrt2;
+            // Normalize diagonal movement speed
+            if (dirX !== 0 && dirY !== 0) {
+                const invSqrt2 = 0.70710678;
+                dirX *= invSqrt2;
+                dirY *= invSqrt2;
+            }
         }
 
         this.isMoving = (dirX !== 0 || dirY !== 0);
