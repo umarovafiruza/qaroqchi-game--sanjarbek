@@ -3647,6 +3647,10 @@ class Game {
         this.ui.showScreen('menu');
         this.handleResize();
         window.addEventListener('resize', () => this.handleResize());
+        window.addEventListener('orientationchange', () => setTimeout(() => this.handleResize(), 150));
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => this.handleResize());
+        }
 
         // Start game loop
         requestAnimationFrame((time) => this.loop(time));
